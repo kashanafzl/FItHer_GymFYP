@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
@@ -17,9 +18,14 @@ export default function Navbar() {
         <ul className="hidden md:flex gap-8 text-gray-300 font-medium">
           <li className="hover:text-orange-500 transition cursor-pointer">Home</li>
           <li className="hover:text-orange-500 transition cursor-pointer">Services</li>
-          <li className="hover:text-orange-500 transition cursor-pointer">BMI</li>
+
+              <Link to={'/dashboard/bmi'} >
+            <li className="hover:text-orange-500 transition cursor-pointer">BMI</li>
+          </Link>
           <li className="hover:text-orange-500 transition cursor-pointer">Plans</li>
-          <li className="hover:text-orange-500 transition cursor-pointer">Contact</li>
+          <Link to={'/contact'} >
+            <li className="hover:text-orange-500 transition cursor-pointer">Contact</li>
+          </Link>
         </ul>
 
         {/* Button */}

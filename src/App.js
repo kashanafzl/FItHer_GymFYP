@@ -20,6 +20,14 @@ import Workouts from "./Components/DashboardLayout/Workouts";
 import Diet from "./Components/DashboardLayout/Diet";
 import BMICalculator from "./Components/DashboardLayout/BMICalculator";
 import Progress from "./Components/DashboardLayout/Progress";
+import Contact from "./Components/LandingPage/Contact/Contact";
+
+/* 👑 ADMIN IMPORTS */
+import AdminLogin from "./Components/Admin/AdminLogin";
+import AdminLayout from "./Components/Admin/AdminLayout";
+import AdminDashboard from "./Components/Admin/AdminDashboard";
+import AdminTrainers from "./Components/Admin/AdminTrainers";
+import AdminMembers from "./Components/Admin/AdminMembers";
 
 export default function App() {
   return (
@@ -35,13 +43,14 @@ export default function App() {
         <Route path="/health" element={<Health />} />
         <Route path="/diet" element={<DietPage />} />
         <Route path="/cardio" element={<Cardio />} />
+        <Route path="/contact" element={<Contact />} />
 
         {/* 🔥 TRAINING */}
         <Route path="/training/:type" element={<TrainingDetails />} />
         <Route path="/trainer/:id" element={<TrainerProfile />} />
         <Route path="/fat-loss" element={<FatLoss />} />
 
-        {/* 💪 DASHBOARD */}
+        {/* 💪 USER DASHBOARD */}
         <Route
           path="/dashboard"
           element={
@@ -74,22 +83,52 @@ export default function App() {
             </DashboardLayout>
           }
         />
-
         <Route
-  path="/dashboard/progress"
-  element={
-    <DashboardLayout>
-      <Progress />
-    </DashboardLayout>
-  }
-/>
+          path="/dashboard/progress"
+          element={
+            <DashboardLayout>
+              <Progress />
+            </DashboardLayout>
+          }
+        />
 
+        
         <Route
           path="/dashboard/bmi"
           element={
             <DashboardLayout>
               <BMICalculator />
             </DashboardLayout>
+          }
+        />
+
+        {/* 👑 ADMIN PANEL */}
+        <Route path="/admin/login" element={<AdminLogin />} />
+
+        <Route
+          path="/admin/dashboard"
+          element={
+            <AdminLayout>
+              <AdminDashboard />
+            </AdminLayout>
+          }
+        />
+
+        <Route
+          path="/admin/trainers"
+          element={
+            <AdminLayout>
+              <AdminTrainers />
+            </AdminLayout>
+          }
+        />
+
+        <Route
+          path="/admin/members"
+          element={
+            <AdminLayout>
+              <AdminMembers />
+            </AdminLayout>
           }
         />
       </Routes>
