@@ -55,7 +55,7 @@ export default function Login() {
         {/* FORM */}
         <div className="w-full md:w-1/2 bg-black p-10 flex flex-col justify-center">
           <h2 className="text-3xl font-bold text-white">
-            Welcome to <span className="text-orange-500">FitX Gym</span>
+            Welcome to <span className="text-orange-500">FitHer Gym</span>
           </h2>
 
           <p className="text-gray-400 text-sm mt-2 mb-8">

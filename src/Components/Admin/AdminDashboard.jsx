@@ -4,19 +4,16 @@ import axios from "axios";
 import {
   FaUsers,
   FaUserPlus,
-  FaUserCheck,
-  FaDollarSign,
-  FaDumbbell,
   FaAppleAlt,
   FaUserTie,
   FaCalendarCheck,
   FaChartLine,
   FaArrowRight,
   FaSpinner,
+  FaVideo,
+  FaUtensils,
 } from "react-icons/fa";
 import {
-  LineChart,
-  Line,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -30,6 +27,8 @@ export default function AdminDashboard() {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [admin, setAdmin] = useState(null);
+  const [dietPlansCount, setDietPlansCount] = useState(0);
+  const [videosCount, setVideosCount] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -38,6 +37,8 @@ export default function AdminDashboard() {
       setAdmin(JSON.parse(adminData));
     }
     fetchStats();
+    fetchDietPlansCount();
+    fetchVideosCount();
   }, []);
 
   const fetchStats = async () => {
@@ -54,7 +55,30 @@ export default function AdminDashboard() {
     }
   };
 
-  // Mock chart data (Replace with real API data)
+  const fetchDietPlansCount = async () => {
+    try {
+      const token = localStorage.getItem("adminToken");
+      const { data } = await axios.get("http://localhost:5000/api/diet-plans/admin", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setDietPlansCount(data.length);
+    } catch (error) {
+      console.error("Diet plans fetch error:", error);
+    }
+  };
+
+  const fetchVideosCount = async () => {
+    try {
+      const token = localStorage.getItem("adminToken");
+      const { data } = await axios.get("http://localhost:5000/api/videos/admin", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setVideosCount(data.length);
+    } catch (error) {
+      console.error("Videos fetch error:", error);
+    }
+  };
+
   const weeklyMembers = [
     { day: "Mon", members: 5 },
     { day: "Tue", members: 8 },
@@ -63,15 +87,6 @@ export default function AdminDashboard() {
     { day: "Fri", members: 15 },
     { day: "Sat", members: 20 },
     { day: "Sun", members: 10 },
-  ];
-
-  const monthlyRevenue = [
-    { month: "Jan", revenue: 50000 },
-    { month: "Feb", revenue: 65000 },
-    { month: "Mar", revenue: 55000 },
-    { month: "Apr", revenue: 80000 },
-    { month: "May", revenue: 75000 },
-    { month: "Jun", revenue: 90000 },
   ];
 
   const statCards = [
@@ -96,24 +111,24 @@ export default function AdminDashboard() {
       borderColor: "border-green-500/30",
     },
     {
-      icon: <FaUserCheck />,
-      label: "Active Members",
-      value: stats?.activeMembers || 0,
-      change: "85%",
+      icon: <FaVideo />,
+      label: "Video Workouts",
+      value: videosCount,
+      change: "Active",
       positive: true,
-      color: "bg-purple-500/10",
-      iconColor: "text-purple-500",
-      borderColor: "border-purple-500/30",
+      color: "bg-red-500/10",
+      iconColor: "text-red-500",
+      borderColor: "border-red-500/30",
     },
     {
-      icon: <FaDollarSign />,
-      label: "Revenue",
-      value: `PKR ${(stats?.revenue || 0).toLocaleString()}`,
-      change: "+18%",
+      icon: <FaAppleAlt />,
+      label: "Diet Plans",
+      value: dietPlansCount,
+      change: "Available",
       positive: true,
-      color: "bg-yellow-500/10",
-      iconColor: "text-yellow-500",
-      borderColor: "border-yellow-500/30",
+      color: "bg-orange-500/10",
+      iconColor: "text-orange-500",
+      borderColor: "border-orange-500/30",
     },
   ];
 
@@ -133,26 +148,26 @@ export default function AdminDashboard() {
       color: "from-green-500 to-emerald-500",
     },
     {
-      icon: <FaDumbbell />,
-      title: "Workouts",
-      desc: "Manage workout plans",
-      path: "/admin/workouts",
-      color: "from-orange-500 to-red-500",
+      icon: <FaVideo />,
+      title: "Video Workouts",
+      desc: "Upload workout videos",
+      path: "/admin/videos",
+      color: "from-red-500 to-pink-500",
     },
     {
       icon: <FaAppleAlt />,
       title: "Diet Plans",
       desc: "Create diet schedules",
-      path: "/admin/diet",
-      color: "from-purple-500 to-pink-500",
+      path: "/admin/diet-plans",
+      color: "from-orange-500 to-yellow-500",
     },
   ];
 
   const recentActivities = [
     { icon: "👤", text: "New member joined: Ahmed Khan", time: "5 min ago", color: "text-green-500" },
     { icon: "💪", text: "Trainer John Smith updated profile", time: "1 hour ago", color: "text-blue-500" },
-    { icon: "💰", text: "Payment received: PKR 5,000", time: "3 hours ago", color: "text-yellow-500" },
-    { icon: "🎯", text: "New workout plan created", time: "5 hours ago", color: "text-orange-500" },
+    { icon: "🎥", text: "New workout video added: Full Body HIIT", time: "3 hours ago", color: "text-red-500" },
+    { icon: "🥗", text: "New diet plan created: Keto Meal Plan", time: "5 hours ago", color: "text-orange-500" },
     { icon: "📋", text: "Member profile updated: Sara Ali", time: "Yesterday", color: "text-purple-500" },
   ];
 
@@ -172,7 +187,7 @@ export default function AdminDashboard() {
           Welcome Back, <span className="text-orange-500">{admin?.name || "Admin"}</span> 👋
         </h2>
         <p className="text-gray-400 mt-1">
-          Here's what's happening at FitX Gym today
+          Here's what's happening at FitHer Gym today
         </p>
       </div>
 
@@ -181,17 +196,18 @@ export default function AdminDashboard() {
         {statCards.map((card, i) => (
           <div
             key={i}
-            className={`bg-[#111] border ${card.borderColor} rounded-xl p-5 hover:scale-105 transition-transform duration-300`}
+            className={`bg-[#111] border ${card.borderColor} rounded-xl p-5 hover:scale-105 transition-transform duration-300 cursor-pointer`}
+            onClick={() => {
+              if (card.label === "Diet Plans") navigate("/admin/diet-plans");
+              if (card.label === "Video Workouts") navigate("/admin/videos");
+              if (card.label === "Total Members" || card.label === "New This Month") navigate("/admin/members");
+            }}
           >
             <div className="flex items-center justify-between mb-4">
               <div className={`w-12 h-12 ${card.color} rounded-xl flex items-center justify-center ${card.iconColor} text-xl`}>
                 {card.icon}
               </div>
-              <span
-                className={`text-xs font-bold ${
-                  card.positive ? "text-green-500" : "text-red-500"
-                } bg-green-500/10 px-2 py-1 rounded-full`}
-              >
+              <span className={`text-xs font-bold ${card.positive ? "text-green-500" : "text-red-500"} bg-green-500/10 px-2 py-1 rounded-full`}>
                 {card.change}
               </span>
             </div>
@@ -201,79 +217,28 @@ export default function AdminDashboard() {
         ))}
       </div>
 
-      {/* Charts Row */}
-      <div className="grid lg:grid-cols-2 gap-6 mb-8">
-        {/* Weekly Members Chart */}
-        <div className="bg-[#111] border border-gray-800 rounded-xl p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-white font-bold text-lg flex items-center gap-2">
-              <FaChartLine className="text-orange-500" />
-              Weekly New Members
-            </h3>
-            <span className="text-gray-500 text-sm">This Week</span>
-          </div>
-
-          <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={weeklyMembers}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
-              <XAxis dataKey="day" stroke="#6b7280" fontSize={12} />
-              <YAxis stroke="#6b7280" fontSize={12} />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "#111",
-                  border: "1px solid #374151",
-                  borderRadius: "8px",
-                  color: "#fff",
-                }}
-              />
-              <Bar
-                dataKey="members"
-                fill="#f97316"
-                radius={[8, 8, 0, 0]}
-                barSize={30}
-              />
-            </BarChart>
-          </ResponsiveContainer>
+      {/* Weekly Members Chart - Full Width */}
+      <div className="bg-[#111] border border-gray-800 rounded-xl p-6 mb-8">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-white font-bold text-lg flex items-center gap-2">
+            <FaChartLine className="text-orange-500" />
+            Weekly New Members
+          </h3>
+          <span className="text-gray-500 text-sm">This Week</span>
         </div>
-
-        {/* Monthly Revenue Chart */}
-        <div className="bg-[#111] border border-gray-800 rounded-xl p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-white font-bold text-lg flex items-center gap-2">
-              <FaDollarSign className="text-green-500" />
-              Monthly Revenue
-            </h3>
-            <span className="text-gray-500 text-sm">2024</span>
-          </div>
-
-          <ResponsiveContainer width="100%" height={250}>
-            <LineChart data={monthlyRevenue}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
-              <XAxis dataKey="month" stroke="#6b7280" fontSize={12} />
-              <YAxis stroke="#6b7280" fontSize={12} />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "#111",
-                  border: "1px solid #374151",
-                  borderRadius: "8px",
-                  color: "#fff",
-                }}
-              />
-              <Line
-                type="monotone"
-                dataKey="revenue"
-                stroke="#22c55e"
-                strokeWidth={3}
-                dot={{ fill: "#22c55e", r: 5 }}
-                activeDot={{ r: 8 }}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart data={weeklyMembers}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
+            <XAxis dataKey="day" stroke="#6b7280" fontSize={12} />
+            <YAxis stroke="#6b7280" fontSize={12} />
+            <Tooltip contentStyle={{ backgroundColor: "#111", border: "1px solid #374151", borderRadius: "8px", color: "#fff" }} />
+            <Bar dataKey="members" fill="#f97316" radius={[8, 8, 0, 0]} barSize={40} />
+          </BarChart>
+        </ResponsiveContainer>
       </div>
 
-      {/* Quick Actions + Recent Activity Row */}
-      <div className="grid lg:grid-cols-3 gap-6">
+      {/* Quick Actions + Recent Activity */}
+      <div className="grid lg:grid-cols-3 gap-6 mb-8">
         {/* Quick Actions */}
         <div className="lg:col-span-2">
           <h3 className="text-white font-bold text-lg mb-4">Quick Actions</h3>
@@ -306,10 +271,7 @@ export default function AdminDashboard() {
           <div className="bg-[#111] border border-gray-800 rounded-xl p-5">
             <div className="space-y-4">
               {recentActivities.map((activity, i) => (
-                <div
-                  key={i}
-                  className="flex items-start gap-3 pb-4 border-b border-gray-800 last:border-0 last:pb-0"
-                >
+                <div key={i} className="flex items-start gap-3 pb-4 border-b border-gray-800 last:border-0 last:pb-0">
                   <span className="text-xl">{activity.icon}</span>
                   <div className="flex-1 min-w-0">
                     <p className="text-gray-300 text-sm">{activity.text}</p>
@@ -323,30 +285,30 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* Bottom Quick Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
+      {/* Bottom Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="bg-gradient-to-br from-blue-500/20 to-blue-600/20 border border-blue-500/30 rounded-xl p-4 text-center">
           <FaCalendarCheck className="text-blue-500 text-2xl mx-auto mb-2" />
-          <h4 className="text-white font-bold text-lg">Today's Check-ins</h4>
+          <h4 className="text-white font-bold text-sm">Today's Check-ins</h4>
           <p className="text-blue-300 text-2xl font-bold">24</p>
         </div>
 
         <div className="bg-gradient-to-br from-green-500/20 to-green-600/20 border border-green-500/30 rounded-xl p-4 text-center">
-          <FaDumbbell className="text-green-500 text-2xl mx-auto mb-2" />
-          <h4 className="text-white font-bold text-lg">Active Trainers</h4>
+          <FaUserTie className="text-green-500 text-2xl mx-auto mb-2" />
+          <h4 className="text-white font-bold text-sm">Active Trainers</h4>
           <p className="text-green-300 text-2xl font-bold">8</p>
         </div>
 
-        <div className="bg-gradient-to-br from-purple-500/20 to-purple-600/20 border border-purple-500/30 rounded-xl p-4 text-center">
-          <FaUsers className="text-purple-500 text-2xl mx-auto mb-2" />
-          <h4 className="text-white font-bold text-lg">Classes Today</h4>
-          <p className="text-purple-300 text-2xl font-bold">12</p>
+        <div className="bg-gradient-to-br from-red-500/20 to-pink-500/20 border border-red-500/30 rounded-xl p-4 text-center">
+          <FaVideo className="text-red-500 text-2xl mx-auto mb-2" />
+          <h4 className="text-white font-bold text-sm">Workout Videos</h4>
+          <p className="text-red-300 text-2xl font-bold">{videosCount}</p>
         </div>
 
-        <div className="bg-gradient-to-br from-orange-500/20 to-red-500/20 border border-orange-500/30 rounded-xl p-4 text-center">
-          <FaDollarSign className="text-orange-500 text-2xl mx-auto mb-2" />
-          <h4 className="text-white font-bold text-lg">Today's Revenue</h4>
-          <p className="text-orange-300 text-2xl font-bold">PKR 15,000</p>
+        <div className="bg-gradient-to-br from-orange-500/20 to-yellow-500/20 border border-orange-500/30 rounded-xl p-4 text-center">
+          <FaUtensils className="text-orange-500 text-2xl mx-auto mb-2" />
+          <h4 className="text-white font-bold text-sm">Diet Plans</h4>
+          <p className="text-orange-300 text-2xl font-bold">{dietPlansCount}</p>
         </div>
       </div>
     </div>

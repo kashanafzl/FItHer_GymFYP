@@ -28,6 +28,9 @@ import AdminLayout from "./Components/Admin/AdminLayout";
 import AdminDashboard from "./Components/Admin/AdminDashboard";
 import AdminTrainers from "./Components/Admin/AdminTrainers";
 import AdminMembers from "./Components/Admin/AdminMembers";
+import PatientDiet from "./Components/LandingPage/PatientDiet/PatientDiet";
+import AdminVideos from "./Components/Admin/AdminVideos";
+import AdminDietPlans from "./Components/Admin/AdminDietPlans";
 
 export default function App() {
   return (
@@ -44,6 +47,7 @@ export default function App() {
         <Route path="/diet" element={<DietPage />} />
         <Route path="/cardio" element={<Cardio />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/patient-diet" element={<PatientDiet />} />
 
         {/* 🔥 TRAINING */}
         <Route path="/training/:type" element={<TrainingDetails />} />
@@ -67,6 +71,9 @@ export default function App() {
             </DashboardLayout>
           }
         />
+
+        <Route path="/admin/videos" element={<AdminLayout><AdminVideos /></AdminLayout>} />
+
         <Route
           path="/dashboard/workouts"
           element={
@@ -83,6 +90,10 @@ export default function App() {
             </DashboardLayout>
           }
         />
+
+
+        <Route path="/admin/diet-plans" element={<AdminLayout><AdminDietPlans /></AdminLayout>} />
+
         <Route
           path="/dashboard/progress"
           element={

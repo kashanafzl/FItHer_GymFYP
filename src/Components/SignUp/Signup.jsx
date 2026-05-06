@@ -62,7 +62,7 @@ export default function Signup() {
           </h2>
 
           <p className="text-gray-400 text-sm mt-2 mb-8">
-            Join FitX Gym and start your journey
+            Join FitHer Gym and start your journey
           </p>
 
           {/* NAME */}

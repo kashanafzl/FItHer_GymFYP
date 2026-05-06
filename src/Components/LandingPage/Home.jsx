@@ -10,6 +10,8 @@ import WhyChooseUs from './WhyChooseUs/WhyChooseUs'
 import Transformations from './Transformations/Transformations'
 import Testimonials from './Testimonialssection/Testimonials '
 import Footer from './Footer/Footer'
+import Video from './Video/Video'
+import Dietplanadd from './AdminDIetplan/Dietplanadd'
 
 export default function Home() {
   return (
@@ -21,6 +23,8 @@ export default function Home() {
         <Service/>
         <Training/>
         <Trainers/>
+        <Video/>
+        <Dietplanadd/>
         <Pricing/>
         <Transformations/>
         <Testimonials/>

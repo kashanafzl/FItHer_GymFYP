@@ -9,7 +9,6 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer,
   BarChart,
   Bar,
@@ -24,12 +23,16 @@ import {
   FaPlus,
   FaTrash,
   FaTint,
+  FaTimes,
+  FaSave,
 } from "react-icons/fa";
 
 export default function Progress() {
   const [logs, setLogs] = useState([]);
   const [stats, setStats] = useState(null);
   const [showForm, setShowForm] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
   const [form, setForm] = useState({
     date: new Date().toISOString().split("T")[0],
@@ -46,6 +49,14 @@ export default function Progress() {
   const fetchData = async () => {
     try {
       const token = localStorage.getItem("token");
+
+      // ✅ Token validation
+      if (!token) {
+        toast.error("Please login to view progress");
+        setLoading(false);
+        return;
+      }
+
       const headers = { Authorization: `Bearer ${token}` };
 
       const [logsRes, statsRes] = await Promise.all([
@@ -53,10 +64,21 @@ export default function Progress() {
         axios.get("http://localhost:5000/api/progress/stats", { headers }),
       ]);
 
-      setLogs(logsRes.data);
-      setStats(statsRes.data);
+      setLogs(logsRes.data || []);
+      setStats(statsRes.data || null);
+      console.log("📊 Progress data loaded:", logsRes.data.length, "logs");
     } catch (error) {
-      console.error(error);
+      console.error("Fetch error:", error.response?.data || error.message);
+
+      if (error.response?.status === 401) {
+        toast.error("Session expired. Please login again.");
+      } else if (error.response?.status === 500) {
+        toast.error("Server error. Please try again later.");
+      } else {
+        toast.error("Failed to load progress data");
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -64,20 +86,51 @@ export default function Progress() {
     fetchData();
   }, []);
 
+  // Handle form change
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
+  };
+
   // Add log
   const addLog = async () => {
+    // Validation
     if (!form.weight) {
       return toast.error("Weight is required!");
     }
 
+    if (!form.date) {
+      return toast.error("Date is required!");
+    }
+
     try {
+      setSaving(true);
       const token = localStorage.getItem("token");
-      await axios.post("http://localhost:5000/api/progress", form, {
+
+      if (!token) {
+        toast.error("Please login again");
+        return;
+      }
+
+      const payload = {
+        date: form.date,
+        weight: Number(form.weight),
+        calories: Number(form.calories) || 0,
+        workoutMinutes: Number(form.workoutMinutes) || 0,
+        exercises: Number(form.exercises) || 0,
+        waterIntake: Number(form.waterIntake) || 0,
+        protein: Number(form.protein) || 0,
+        note: form.note || "",
+      };
+
+      await axios.post("http://localhost:5000/api/progress", payload, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
       toast.success("Progress saved! 💪");
       setShowForm(false);
+      
+      // Reset form
       setForm({
         date: new Date().toISOString().split("T")[0],
         weight: "",
@@ -88,23 +141,50 @@ export default function Progress() {
         protein: "",
         note: "",
       });
+
+      // Refresh data
       fetchData();
     } catch (error) {
-      toast.error("Failed to save");
+      console.error("Save error:", error.response?.data || error.message);
+      
+      if (error.response?.status === 401) {
+        toast.error("Session expired. Please login again.");
+      } else {
+        toast.error(error.response?.data?.message || "Failed to save progress");
+      }
+    } finally {
+      setSaving(false);
     }
   };
 
   // Delete log
   const deleteLog = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this log?")) {
+      return;
+    }
+
     try {
       const token = localStorage.getItem("token");
+
+      if (!token) {
+        toast.error("Please login again");
+        return;
+      }
+
       await axios.delete(`http://localhost:5000/api/progress/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      toast.success("Log deleted");
+
+      toast.success("Log deleted successfully! 🗑️");
       fetchData();
     } catch (error) {
-      toast.error("Delete failed");
+      console.error("Delete error:", error.response?.data || error.message);
+      
+      if (error.response?.status === 401) {
+        toast.error("Session expired. Please login again.");
+      } else {
+        toast.error("Failed to delete log");
+      }
     }
   };
 
@@ -120,11 +200,21 @@ export default function Progress() {
     protein: log.protein,
   }));
 
+  // Loading state
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="w-12 h-12 border-3 border-orange-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
   return (
     <div>
       <ToastContainer
         position="top-right"
         toastClassName="bg-gray-900 text-white border border-gray-700"
+        autoClose={3000}
       />
 
       {/* Header */}
@@ -141,15 +231,15 @@ export default function Progress() {
           onClick={() => setShowForm(!showForm)}
           className="px-5 py-3 bg-orange-500 rounded-full font-semibold text-white hover:bg-orange-600 transition-all flex items-center gap-2 shadow-lg shadow-orange-500/20"
         >
-          <FaPlus />
-          Add Log
+          {showForm ? <FaTimes /> : <FaPlus />}
+          {showForm ? "Close" : "Add Log"}
         </button>
       </div>
 
       {/* Stats Cards */}
       {stats && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <div className="bg-[#111] border border-gray-800 rounded-xl p-4">
+          <div className="bg-[#111] border border-gray-800 rounded-xl p-4 hover:border-orange-500 transition-all">
             <FaWeight className="text-orange-500 text-xl mb-2" />
             <p className="text-gray-400 text-xs">Current Weight</p>
             <h3 className="text-white text-2xl font-bold">
@@ -158,7 +248,7 @@ export default function Progress() {
             </h3>
           </div>
 
-          <div className="bg-[#111] border border-gray-800 rounded-xl p-4">
+          <div className="bg-[#111] border border-gray-800 rounded-xl p-4 hover:border-orange-500 transition-all">
             <FaFire className="text-orange-500 text-xl mb-2" />
             <p className="text-gray-400 text-xs">Weight Change</p>
             <h3
@@ -171,24 +261,24 @@ export default function Progress() {
               }`}
             >
               {stats.totalWeightLost > 0 ? "-" : "+"}
-              {Math.abs(stats.totalWeightLost)}
+              {Math.abs(stats.totalWeightLost || 0)}
               <span className="text-sm"> kg</span>
             </h3>
           </div>
 
-          <div className="bg-[#111] border border-gray-800 rounded-xl p-4">
+          <div className="bg-[#111] border border-gray-800 rounded-xl p-4 hover:border-orange-500 transition-all">
             <FaDumbbell className="text-orange-500 text-xl mb-2" />
             <p className="text-gray-400 text-xs">Total Workouts</p>
             <h3 className="text-white text-2xl font-bold">
-              {stats.totalWorkouts}
+              {stats.totalWorkouts || 0}
             </h3>
           </div>
 
-          <div className="bg-[#111] border border-gray-800 rounded-xl p-4">
+          <div className="bg-[#111] border border-gray-800 rounded-xl p-4 hover:border-orange-500 transition-all">
             <FaClock className="text-orange-500 text-xl mb-2" />
             <p className="text-gray-400 text-xs">Day Streak</p>
             <h3 className="text-white text-2xl font-bold">
-              {stats.streak} 🔥
+              {stats.streak || 0} 🔥
             </h3>
           </div>
         </div>
@@ -196,7 +286,7 @@ export default function Progress() {
 
       {/* CHARTS SECTION */}
       <div className="grid md:grid-cols-2 gap-6 mb-8">
-        {/* Weight Trend - Line Chart */}
+        {/* Weight Trend */}
         <div className="bg-[#111] border border-gray-800 rounded-xl p-6">
           <h3 className="text-white font-semibold mb-4 flex items-center gap-2">
             <FaWeight className="text-orange-500" />
@@ -227,11 +317,14 @@ export default function Progress() {
               </LineChart>
             </ResponsiveContainer>
           ) : (
-            <p className="text-gray-500 text-center py-12">No data yet</p>
+            <div className="text-center py-12 text-gray-500">
+              <FaWeight className="text-4xl mx-auto mb-3 opacity-30" />
+              <p>No weight data yet</p>
+            </div>
           )}
         </div>
 
-        {/* Calories - Bar Chart */}
+        {/* Calories */}
         <div className="bg-[#111] border border-gray-800 rounded-xl p-6">
           <h3 className="text-white font-semibold mb-4 flex items-center gap-2">
             <FaFire className="text-orange-500" />
@@ -255,11 +348,14 @@ export default function Progress() {
               </BarChart>
             </ResponsiveContainer>
           ) : (
-            <p className="text-gray-500 text-center py-12">No data yet</p>
+            <div className="text-center py-12 text-gray-500">
+              <FaFire className="text-4xl mx-auto mb-3 opacity-30" />
+              <p>No calorie data yet</p>
+            </div>
           )}
         </div>
 
-        {/* Workout Minutes - Area Chart */}
+        {/* Workout Minutes */}
         <div className="bg-[#111] border border-gray-800 rounded-xl p-6">
           <h3 className="text-white font-semibold mb-4 flex items-center gap-2">
             <FaClock className="text-orange-500" />
@@ -289,11 +385,14 @@ export default function Progress() {
               </AreaChart>
             </ResponsiveContainer>
           ) : (
-            <p className="text-gray-500 text-center py-12">No data yet</p>
+            <div className="text-center py-12 text-gray-500">
+              <FaClock className="text-4xl mx-auto mb-3 opacity-30" />
+              <p>No workout data yet</p>
+            </div>
           )}
         </div>
 
-        {/* Protein Intake - Line Chart */}
+        {/* Protein Intake */}
         <div className="bg-[#111] border border-gray-800 rounded-xl p-6">
           <h3 className="text-white font-semibold mb-4 flex items-center gap-2">
             🥩 Protein Intake
@@ -322,7 +421,10 @@ export default function Progress() {
               </LineChart>
             </ResponsiveContainer>
           ) : (
-            <p className="text-gray-500 text-center py-12">No data yet</p>
+            <div className="text-center py-12 text-gray-500">
+              <span className="text-4xl block mb-3 opacity-30">🥩</span>
+              <p>No protein data yet</p>
+            </div>
           )}
         </div>
       </div>
@@ -331,76 +433,74 @@ export default function Progress() {
       {showForm && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
           <div className="bg-[#111] border border-gray-800 rounded-2xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
-            <h3 className="text-xl font-bold text-white mb-4">
-              Add Daily Log
-            </h3>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold text-white">Add Daily Log</h3>
+              <button
+                onClick={() => setShowForm(false)}
+                className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-all"
+              >
+                <FaTimes />
+              </button>
+            </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-gray-400 text-sm block mb-2">
-                  Date
-                </label>
+                <label className="text-gray-400 text-sm block mb-2">Date</label>
                 <input
                   type="date"
+                  name="date"
                   value={form.date}
-                  onChange={(e) => setForm({ ...form, date: e.target.value })}
+                  onChange={handleChange}
                   className="w-full p-3 bg-black border border-gray-700 rounded-lg text-white focus:border-orange-500 outline-none"
                 />
               </div>
 
               <div>
                 <label className="text-gray-400 text-sm block mb-2">
-                  Weight (kg) *
+                  Weight (kg) <span className="text-orange-500">*</span>
                 </label>
                 <input
                   type="number"
+                  name="weight"
                   value={form.weight}
-                  onChange={(e) => setForm({ ...form, weight: e.target.value })}
+                  onChange={handleChange}
                   className="w-full p-3 bg-black border border-gray-700 rounded-lg text-white focus:border-orange-500 outline-none"
                   placeholder="70"
+                  step="0.1"
                 />
               </div>
 
               <div>
-                <label className="text-gray-400 text-sm block mb-2">
-                  Calories
-                </label>
+                <label className="text-gray-400 text-sm block mb-2">Calories</label>
                 <input
                   type="number"
+                  name="calories"
                   value={form.calories}
-                  onChange={(e) =>
-                    setForm({ ...form, calories: e.target.value })
-                  }
+                  onChange={handleChange}
                   className="w-full p-3 bg-black border border-gray-700 rounded-lg text-white focus:border-orange-500 outline-none"
                   placeholder="2000"
                 />
               </div>
 
               <div>
-                <label className="text-gray-400 text-sm block mb-2">
-                  Workout (min)
-                </label>
+                <label className="text-gray-400 text-sm block mb-2">Workout (min)</label>
                 <input
                   type="number"
+                  name="workoutMinutes"
                   value={form.workoutMinutes}
-                  onChange={(e) =>
-                    setForm({ ...form, workoutMinutes: e.target.value })
-                  }
+                  onChange={handleChange}
                   className="w-full p-3 bg-black border border-gray-700 rounded-lg text-white focus:border-orange-500 outline-none"
                   placeholder="45"
                 />
               </div>
 
               <div>
-                <label className="text-gray-400 text-sm block mb-2">
-                  Exercises
-                </label>
+                <label className="text-gray-400 text-sm block mb-2">Exercises</label>
                 <input
                   type="number"
+                  name="exercises"
                   value={form.exercises}
-                  onChange={(e) =>
-                    setForm({ ...form, exercises: e.target.value })
-                  }
+                  onChange={handleChange}
                   className="w-full p-3 bg-black border border-gray-700 rounded-lg text-white focus:border-orange-500 outline-none"
                   placeholder="6"
                 />
@@ -412,37 +512,32 @@ export default function Progress() {
                 </label>
                 <input
                   type="number"
+                  name="waterIntake"
                   value={form.waterIntake}
-                  onChange={(e) =>
-                    setForm({ ...form, waterIntake: e.target.value })
-                  }
+                  onChange={handleChange}
                   className="w-full p-3 bg-black border border-gray-700 rounded-lg text-white focus:border-orange-500 outline-none"
                   placeholder="8"
                 />
               </div>
 
               <div className="col-span-2">
-                <label className="text-gray-400 text-sm block mb-2">
-                  Protein (g)
-                </label>
+                <label className="text-gray-400 text-sm block mb-2">Protein (g)</label>
                 <input
                   type="number"
+                  name="protein"
                   value={form.protein}
-                  onChange={(e) =>
-                    setForm({ ...form, protein: e.target.value })
-                  }
+                  onChange={handleChange}
                   className="w-full p-3 bg-black border border-gray-700 rounded-lg text-white focus:border-orange-500 outline-none"
                   placeholder="150"
                 />
               </div>
 
               <div className="col-span-2">
-                <label className="text-gray-400 text-sm block mb-2">
-                  Note
-                </label>
+                <label className="text-gray-400 text-sm block mb-2">Note</label>
                 <textarea
+                  name="note"
                   value={form.note}
-                  onChange={(e) => setForm({ ...form, note: e.target.value })}
+                  onChange={handleChange}
                   className="w-full p-3 bg-black border border-gray-700 rounded-lg text-white focus:border-orange-500 outline-none resize-none"
                   rows="2"
                   placeholder="Feeling great today!"
@@ -459,23 +554,42 @@ export default function Progress() {
               </button>
               <button
                 onClick={addLog}
-                className="flex-1 py-3 bg-orange-500 rounded-full font-semibold text-white hover:bg-orange-600 transition-all"
+                disabled={saving}
+                className="flex-1 py-3 bg-orange-500 rounded-full font-semibold text-white hover:bg-orange-600 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
               >
-                Save Log
+                {saving ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <FaSave />
+                    Save Log
+                  </>
+                )}
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Recent Logs */}
+      {/* Recent Logs Table */}
       <div className="bg-[#111] border border-gray-800 rounded-xl p-6">
-        <h3 className="text-white font-semibold mb-4">Recent Logs</h3>
+        <h3 className="text-white font-semibold mb-4">
+          Recent Logs ({logs.length})
+        </h3>
 
         {logs.length === 0 ? (
           <div className="text-center py-12 text-gray-500">
             <span className="text-5xl">📊</span>
             <p className="mt-3">No logs yet. Start tracking your progress!</p>
+            <button
+              onClick={() => setShowForm(true)}
+              className="mt-4 bg-orange-500 text-white px-6 py-2 rounded-full hover:bg-orange-600 transition-all"
+            >
+              Add Your First Log
+            </button>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -487,14 +601,14 @@ export default function Progress() {
                   <th className="pb-3">Calories</th>
                   <th className="pb-3">Workout</th>
                   <th className="pb-3">Protein</th>
-                  <th className="pb-3">Action</th>
+                  <th className="pb-3 text-right">Action</th>
                 </tr>
               </thead>
               <tbody>
                 {logs.slice(0, 10).map((log) => (
                   <tr
                     key={log._id}
-                    className="border-b border-gray-800/50 hover:bg-gray-900/50"
+                    className="border-b border-gray-800/50 hover:bg-gray-900/50 transition-colors"
                   >
                     <td className="py-3 text-white text-sm">
                       {new Date(log.date).toLocaleDateString("en-US", {
@@ -508,15 +622,18 @@ export default function Progress() {
                       </span>
                       <span className="text-gray-500 text-sm"> kg</span>
                     </td>
-                    <td className="py-3 text-white">{log.calories}</td>
+                    <td className="py-3 text-white">{log.calories || "-"}</td>
                     <td className="py-3 text-white">
-                      {log.workoutMinutes} min
+                      {log.workoutMinutes ? `${log.workoutMinutes} min` : "-"}
                     </td>
-                    <td className="py-3 text-purple-400">{log.protein}g</td>
-                    <td className="py-3">
+                    <td className="py-3 text-purple-400">
+                      {log.protein ? `${log.protein}g` : "-"}
+                    </td>
+                    <td className="py-3 text-right">
                       <button
                         onClick={() => deleteLog(log._id)}
-                        className="text-red-500 hover:text-red-400 transition-all"
+                        className="text-red-500 hover:text-red-400 hover:bg-red-500/10 p-2 rounded-lg transition-all"
+                        title="Delete log"
                       >
                         <FaTrash />
                       </button>
