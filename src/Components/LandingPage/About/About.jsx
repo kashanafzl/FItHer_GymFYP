@@ -1,5 +1,5 @@
 import React from "react";
-import aboutImg from "../../../Assets/5.jpg"; // apni image use karo
+import aboutImg from "../../../Assets/2.jpg"; // apni image use karo
 
 export default function About() {
   return (

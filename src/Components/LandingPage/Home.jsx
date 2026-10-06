@@ -12,6 +12,7 @@ import Testimonials from './Testimonialssection/Testimonials '
 import Footer from './Footer/Footer'
 import Video from './Video/Video'
 import Dietplanadd from './AdminDIetplan/Dietplanadd'
+import AIChatbot from '../AI/AIChatbot'
 
 export default function Home() {
   return (
@@ -29,6 +30,10 @@ export default function Home() {
         <Transformations/>
         <Testimonials/>
         <Footer/>
+
+
+            {/* ✅ AI CHATBOT - Screen pe floating icon */}
+      <AIChatbot />
         
     </div>
   )

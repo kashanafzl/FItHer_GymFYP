@@ -5,7 +5,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 export default function AdminLogin() {
-  // ✅ Empty initial values - user khud type karega
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -131,7 +131,7 @@ export default function AdminLogin() {
 
           {/* Hint */}
           <p className="text-center text-gray-600 text-xs mt-4">
-            Default: amber@gmail.com / 123456
+            Default: admin@gmail.com / 123456
           </p>
         </form>
       </div>

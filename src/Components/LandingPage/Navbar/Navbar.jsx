@@ -31,7 +31,7 @@ export default function Navbar() {
         {/* Logo */}
         <Link to="/" onClick={() => setOpen(false)}>
           <h1 className="text-2xl font-bold tracking-wide">
-            <span className="text-white">FitHer </span>
+            <span className="text-white">Fitness </span>
             <span className="text-orange-500">Gym</span>
           </h1>
         </Link>
@@ -56,6 +56,13 @@ export default function Navbar() {
           
           <Link to="/contact" onClick={() => setOpen(false)}>
             <li className="hover:text-orange-500 transition cursor-pointer">Contact</li>
+          </Link>
+
+          {/* ✅ AI DIET LINK - DESKTOP */}
+          <Link to="/ai-diet" onClick={() => setOpen(false)}>
+            <li className="hover:text-orange-500 transition cursor-pointer">
+              🤖 AI Diet
+            </li>
           </Link>
         </ul>
 
@@ -103,7 +110,7 @@ export default function Navbar() {
       {/* Mobile Menu */}
       <div
         className={`md:hidden overflow-hidden transition-all duration-300 ${
-          open ? "max-h-[500px] py-4 px-6 border-t border-gray-800" : "max-h-0"
+          open ? "max-h-[600px] py-4 px-6 border-t border-gray-800" : "max-h-0"
         }`}
       >
         <div className="bg-black space-y-4 pb-4">
@@ -125,6 +132,13 @@ export default function Navbar() {
           
           <Link to="/contact" onClick={() => setOpen(false)}>
             <p className="hover:text-orange-500 cursor-pointer py-2">📞 Contact</p>
+          </Link>
+
+          {/* ✅ AI DIET LINK - MOBILE */}
+          <Link to="/ai-diet" onClick={() => setOpen(false)}>
+            <p className="hover:text-orange-500 cursor-pointer py-2">
+              🤖 AI Diet Plan
+            </p>
           </Link>
 
           {/* Mobile Buttons */}

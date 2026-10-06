@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import axios from "axios";
-import image from "../../Assets/1.jpg";
+import image from "../../Assets/2.jpg";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -55,7 +55,7 @@ export default function Login() {
         {/* FORM */}
         <div className="w-full md:w-1/2 bg-black p-10 flex flex-col justify-center">
           <h2 className="text-3xl font-bold text-white">
-            Welcome to <span className="text-orange-500">FitHer Gym</span>
+            Welcome to <span className="text-orange-500">Fitness Gym</span>
           </h2>
 
           <p className="text-gray-400 text-sm mt-2 mb-8">
@@ -131,6 +131,17 @@ export default function Login() {
               {showPassword ? "🙈" : "👁️"}
             </span>
           </div>
+
+
+          {/* Forgot Password Link */}
+<div className="flex justify-end mb-4">
+  <NavLink
+    to="/forgot-password"
+    className="text-orange-500 hover:text-orange-400 text-sm underline underline-offset-2 transition-all"
+  >
+    Forgot Password?
+  </NavLink>
+</div>
 
           <button
             onClick={submitLogin}

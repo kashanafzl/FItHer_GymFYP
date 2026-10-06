@@ -32,6 +32,12 @@ import PatientDiet from "./Components/LandingPage/PatientDiet/PatientDiet";
 import AdminVideos from "./Components/Admin/AdminVideos";
 import AdminDietPlans from "./Components/Admin/AdminDietPlans";
 
+
+import AIDietGenerator from "./Components/AI/AIDietGenerator";
+import ForgotPassword from "./Components/Login/ForgotPassword";
+import ResetPassword from "./Components/Login/ResetPassword";
+import AIChatbot from "./Components/AI/AIChatbot";
+
 export default function App() {
   return (
     <Router>
@@ -41,6 +47,11 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
 
+        {/* for got */}
+
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+<Route path="/reset-password/:token" element={<ResetPassword />} />
+
         {/* 🏋️ PAGES */}
         <Route path="/strength" element={<Strength />} />
         <Route path="/health" element={<Health />} />
@@ -48,6 +59,11 @@ export default function App() {
         <Route path="/cardio" element={<Cardio />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/patient-diet" element={<PatientDiet />} />
+
+
+        {/* 🤖 AI FEATURES */}
+<Route path="/ai-diet" element={<AIDietGenerator />} />
+<Route path="/ai-chatbot" element={<AIChatbot />} />
 
         {/* 🔥 TRAINING */}
         <Route path="/training/:type" element={<TrainingDetails />} />

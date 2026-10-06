@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 
-import img1 from "../../../Assets/1.jpg";
-import img2 from "../../../Assets/2.jpg";
-import img3 from "../../../Assets/3.jpg";
-import img4 from "../../../Assets/4.jpg";
+import img1 from "../../../Assets/7.jpg";
+import img2 from "../../../Assets/8.jpg";
+import img3 from "../../../Assets/9.jpg";
+import img4 from "../../../Assets/10.jpg";
 
 const images = [img1, img2, img3, img4];
 
